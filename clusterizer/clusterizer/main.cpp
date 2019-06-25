@@ -11,7 +11,7 @@ struct Obj
     Obj ()
         { }
     Obj (double X, double Y):
-        x (x),
+        x (X),
         y (Y)
         { }
     };
@@ -35,8 +35,10 @@ int main ()
 
     std::vector <Obj> objects;
     for (int i = 0; i < nObj; i++)
-        objects.push_back (Obj (rand() % M_SIZE, rand() % M_SIZE));
+        objects.push_back (Obj (rand() % M_SIZE, i));
     
+    printOut (objects);
+
     function (objects, 3, distance);
 
     system ("pause");
@@ -47,6 +49,27 @@ int main ()
 template<typename T>
 void function (std::vector<T> obj, double d, double (*metrics)(T, T))
     {
+    std::vector <int> nNeighb;
+
+    for (int i = 0; i < obj.size (); i++)
+        {
+        nNeighb.push_back (0);
+
+        for (int j = 0; j < obj.size(); j++)
+            {
+            if (i != j)
+                { 
+                double dist = metrics (obj [i], obj [j]);
+
+                std::cout << dist << std::endl;
+
+                if (dist < d)
+                    nNeighb.back () += 1;
+                }
+            
+            }
+        std::cout << '\t' << nNeighb.back () << std::endl;
+        }
 
     }
 
@@ -62,7 +85,7 @@ void printOut (std::vector <Obj> objects)
         {
         for (int j = 0; j < 10; j++)
             {
-            printf ("%d", matrix [i] [j]);
+            printf ("%d ", matrix [i] [j]);
             }
         printf ("\n");
         }
