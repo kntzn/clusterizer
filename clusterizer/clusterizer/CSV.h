@@ -32,7 +32,7 @@ class CSV
                     buf [i] = '\0';
                     }
 
-                else if (buf [i] == ';')
+                else if (buf [i] == ',')
                     {
                     n_strings++;
                     buf [i] = '\0';

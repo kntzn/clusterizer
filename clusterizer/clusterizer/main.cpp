@@ -33,26 +33,37 @@ void printOut (std::vector <Obj> objects);
 
 int main ()
     { 
-    int nObj = M_SIZE;
+    
+
+    std::vector <Obj> objects;
 
     CSV inputFile ("input.csv");
     
+    for (int i = 1; i < inputFile.height (); i++)
+        {
+        objects.push_back (Obj (std::atof (inputFile.get (1, i)),
+                                std::atof (inputFile.get (2, i)),
+                                i));
+        }
+
+    std::vector <std::vector <Obj>> clusters = function (objects, 50, -1, distance);
+
+    // Output
+
+
+
+    std::string output = "x,y,c_id\n";
     
+    for (int i = 0; i < clusters.size (); i++)
+        { 
+        for (int j = 0; j < clusters [i].size (); j++)
+            {
+            output += std::to_string (clusters [i] [j].x) + "," + std::to_string (clusters [i] [j].y) + "," + std::to_string (i) + "\n";
+            }
+        }
 
-
-    std::vector <Obj> objects;
-    //for (int i = 0; i < nObj; i++)
-        //objects.push_back (Obj (i, rand() % M_SIZE, i));
-    
-    printOut (objects);
-
-    std::vector <std::vector <Obj>> clusters = function (objects, 5, 2, distance);
-
-
-
-
-
-
+    FileIO outputFile;
+    outputFile.fastSave ("output.csv", output.c_str (), output.length ());
 
     system ("pause");
     return 0;
@@ -171,7 +182,7 @@ std::vector<std::vector <T>> function (std::vector<T> obj, double d, double n, d
                 }
             }
 
-        if (!root_previously_recorded && root [i] != -1) 
+        if (!root_previously_recorded) 
             clusters_roots.push_back (root [i]);
 
         }
