@@ -90,23 +90,28 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
         }
 
     // Pointers to the parents
-    std::vector <T*> root;
+    std::vector <int> root;
 
     // For each object
     for (int i = 0; i < obj.size (); i++)
         { 
-        int maxNeighb = 0;
+        int maxNeighb = neighb [i].size();
         int maxNeighb_id = -1;
-        std::cout << i << ' ';
+       
+        
+
         // For each object's neighb. id
         for (int j = 0; j < neighb [i].size (); j++)
             {
+            
             int real_id = neighb [i] [j];
 
             int nNeighbOfTheNeighb = neighb [real_id].size ();
             
+
+
             if ((nNeighbOfTheNeighb > maxNeighb) ||
-                ((nNeighbOfTheNeighb == maxNeighb) && 
+                ((nNeighbOfTheNeighb == maxNeighb) && (nNeighbOfTheNeighb != 1) &&
                  (metrics (obj [real_id], obj [i]) < 
                  (metrics (obj [maxNeighb_id], obj [i])))))
                 {
@@ -115,16 +120,30 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
                 }
             }
 
-        printf ("\n");
 
-        if (maxNeighb_id == -1)
-            root.push_back (nullptr);
-        else
-            root.push_back (&obj [maxNeighb_id]);
+        root.push_back (maxNeighb_id);
+        }
+
+    //for (int i = 0; i < obj.size (); i++)
+        //std::cout << i << ' ' << root [i] << std::endl;
+
+    
+
+    // Creates complete path to the root of the cluster
+
+    // For each object
+    for (int i = 0; i < obj.size (); i++)
+        { 
+        while (root [root [i]] != -1)
+            root [i] = root [root [i]];
         }
 
 
-
+    printf ("\n");
+    // Outputs the cluster
+    for (int i = 0; i < obj.size (); i++)
+        std::cout << i << ' ' << root [i] << std::endl;
+        
     }
 
 void printOut (std::vector <Obj> objects)
