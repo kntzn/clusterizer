@@ -58,11 +58,13 @@ int main ()
 template<typename T>
 void function (std::vector<T> obj, double d, double (*metrics)(T, T))
     {
-    std::vector <std::vector <T>> neighb;
+    // This counts neighbours
+    // [id][id_neighb] -> obj    
+    std::vector <std::vector <int>> neighb;
 
     for (int i = 0; i < obj.size (); i++)
         {
-        std::vector <T> this_id_neighb;
+        std::vector <int> this_id_neighb;
 
         neighb.push_back (this_id_neighb);
 
@@ -73,17 +75,54 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
                 double dist = metrics (obj [i], obj [j]);
 
                 if (dist < d)
-                    neighb.back ().push_back (obj [j]);
+                    neighb.back ().push_back (j);
                 }
 
             }
+
+
         std::cout << i << ' ';
         for (auto j : neighb.back ())
             { 
-            std::cout << j.id << ' ';
+            std::cout << j << ' ';
             }
         std::cout << std::endl;
         }
+
+    // Pointers to the parents
+    std::vector <T*> root;
+
+    // For each object
+    for (int i = 0; i < obj.size (); i++)
+        { 
+        int maxNeighb = 0;
+        int maxNeighb_id = -1;
+        std::cout << i << ' ';
+        // For each object's neighb. id
+        for (int j = 0; j < neighb [i].size (); j++)
+            {
+            int real_id = neighb [i] [j];
+
+            int nNeighbOfTheNeighb = neighb [real_id].size ();
+            
+            if ((nNeighbOfTheNeighb > maxNeighb) ||
+                ((nNeighbOfTheNeighb == maxNeighb) && 
+                 (metrics (obj [real_id], obj [i]) < 
+                 (metrics (obj [maxNeighb_id], obj [i])))))
+                {
+                maxNeighb = nNeighbOfTheNeighb;
+                maxNeighb_id = real_id;
+                }
+            }
+
+        printf ("\n");
+
+        if (maxNeighb_id == -1)
+            root.push_back (nullptr);
+        else
+            root.push_back (&obj [maxNeighb_id]);
+        }
+
 
 
     }
