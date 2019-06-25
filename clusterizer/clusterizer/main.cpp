@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#define M_SIZE 10
+#define M_SIZE 20
 
 template<typename T>
 struct Cluster
@@ -38,7 +38,7 @@ void printOut (std::vector <Obj> objects);
 
 int main ()
     { 
-    int nObj = 10;
+    int nObj = M_SIZE;
 
     std::vector <Obj> objects;
     for (int i = 0; i < nObj; i++)
@@ -46,7 +46,7 @@ int main ()
     
     printOut (objects);
 
-    function (objects, 3, distance);
+    function (objects, 4, distance);
 
     system ("pause");
     return 0;
@@ -98,8 +98,6 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
         int maxNeighb = neighb [i].size();
         int maxNeighb_id = -1;
        
-        
-
         // For each object's neighb. id
         for (int j = 0; j < neighb [i].size (); j++)
             {
@@ -108,10 +106,10 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
 
             int nNeighbOfTheNeighb = neighb [real_id].size ();
             
-
+            std::cout << i << ' ' << j << ' ' << real_id << ' ' << nNeighbOfTheNeighb << ' ' << maxNeighb_id << std::endl;
 
             if ((nNeighbOfTheNeighb > maxNeighb) ||
-                ((nNeighbOfTheNeighb == maxNeighb) && (nNeighbOfTheNeighb != 1) &&
+                ((nNeighbOfTheNeighb == maxNeighb) && (nNeighbOfTheNeighb != 1) && (neighb [i].size () < maxNeighb) &&
                  (metrics (obj [real_id], obj [i]) < 
                  (metrics (obj [maxNeighb_id], obj [i])))))
                 {
@@ -124,26 +122,29 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
         root.push_back (maxNeighb_id);
         }
 
-    //for (int i = 0; i < obj.size (); i++)
-        //std::cout << i << ' ' << root [i] << std::endl;
 
-    
-
-    // Creates complete path to the root of the cluster
+    std::cout << "Joints complete" << std::endl;
+    // Creates complete path to the root of the subcluster
 
     // For each object
     for (int i = 0; i < obj.size (); i++)
         { 
-        while (root [root [i]] != -1)
+        while (root [i] != -1 && root [root [i]] != -1)
+            {
+            std::cout << i << ' ' << root [i] << ' ' << std::endl;
             root [i] = root [root [i]];
+            }
         }
 
 
     printf ("\n");
     // Outputs the cluster
     for (int i = 0; i < obj.size (); i++)
-        std::cout << i << ' ' << root [i] << std::endl;
-        
+        if (root [i] != -1)
+            std::cout << i << " - joins to " << root [i] << std::endl;
+        else
+            std::cout << i << " - no cluster" << std::endl;
+    
     }
 
 void printOut (std::vector <Obj> objects)
@@ -154,12 +155,12 @@ void printOut (std::vector <Obj> objects)
         matrix [(int) i.x] [(int) i.y]++;
 
     printf ("\n\n");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < M_SIZE; i++)
         printf ("%d ", i);
     printf ("\n\n");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < M_SIZE; i++)
         {
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < M_SIZE; j++)
             {
             printf ("%d ", matrix [j] [i]);
             }
