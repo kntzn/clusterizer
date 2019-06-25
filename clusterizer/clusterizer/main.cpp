@@ -1,13 +1,8 @@
 #include <iostream>
 #include <vector>
+#include "CSV.h"
 
 #define M_SIZE 20
-
-template<typename T>
-struct Cluster
-    {
-    std::vector <T> objects;
-    };
 
 struct Obj
     {
@@ -24,7 +19,7 @@ struct Obj
         { }
     };
 
-template <typename T> void function (std::vector <T> obj, double d, double (*metrics) (T, T));
+template <typename T> std::vector<std::vector <T>> function (std::vector <T> obj, double d, double n, double (*metrics) (T, T));
 
 double distance (Obj obj0, Obj obj1)
     {
@@ -40,13 +35,24 @@ int main ()
     { 
     int nObj = M_SIZE;
 
+    CSV inputFile ("input.csv");
+    
+    
+
+
     std::vector <Obj> objects;
-    for (int i = 0; i < nObj; i++)
-        objects.push_back (Obj (i, rand() % M_SIZE, i));
+    //for (int i = 0; i < nObj; i++)
+        //objects.push_back (Obj (i, rand() % M_SIZE, i));
     
     printOut (objects);
 
-    function (objects, 4, distance);
+    std::vector <std::vector <Obj>> clusters = function (objects, 5, 2, distance);
+
+
+
+
+
+
 
     system ("pause");
     return 0;
@@ -56,10 +62,10 @@ int main ()
 
 
 template<typename T>
-void function (std::vector<T> obj, double d, double (*metrics)(T, T))
+std::vector<std::vector <T>> function (std::vector<T> obj, double d, double n, double (*metrics)(T, T))
     {
     // This counts neighbours
-    // [id][id_neighb] -> obj    
+    // [id][id_neighb] -> obj_id
     std::vector <std::vector <int>> neighb;
 
     for (int i = 0; i < obj.size (); i++)
@@ -106,7 +112,7 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
 
             int nNeighbOfTheNeighb = neighb [real_id].size ();
             
-            std::cout << i << ' ' << j << ' ' << real_id << ' ' << nNeighbOfTheNeighb << ' ' << maxNeighb_id << std::endl;
+//            std::cout << i << ' ' << j << ' ' << real_id << ' ' << nNeighbOfTheNeighb << ' ' << maxNeighb_id << std::endl;
 
             if ((nNeighbOfTheNeighb > maxNeighb) ||
                 ((nNeighbOfTheNeighb == maxNeighb) && (nNeighbOfTheNeighb != 1) && (neighb [i].size () < maxNeighb) &&
@@ -122,29 +128,86 @@ void function (std::vector<T> obj, double d, double (*metrics)(T, T))
         root.push_back (maxNeighb_id);
         }
 
-
-    std::cout << "Joints complete" << std::endl;
     // Creates complete path to the root of the subcluster
-
     // For each object
     for (int i = 0; i < obj.size (); i++)
         { 
         while (root [i] != -1 && root [root [i]] != -1)
             {
-            std::cout << i << ' ' << root [i] << ' ' << std::endl;
+            //std::cout << i << ' ' << root [i] << ' ' << std::endl;
             root [i] = root [root [i]];
             }
         }
 
 
-    printf ("\n");
-    // Outputs the cluster
+    // Switches root's root value to itself
     for (int i = 0; i < obj.size (); i++)
-        if (root [i] != -1)
-            std::cout << i << " - joins to " << root [i] << std::endl;
-        else
-            std::cout << i << " - no cluster" << std::endl;
+        if (root [i] == -1)
+            for (auto j : root)
+                if (j == i)
+                    {
+                    root [i] = j;
+                    break;
+                    }
+                
+    // Destroys the root if it does not have enough neighb.
+    // (Param n)
+    for (int i = 0; i < obj.size (); i++)
+        if (neighb [i].size () < n && root [i] == i)
+            root [i] = -1;  
     
+    // Saves clusters_roots
+    std::vector <int> clusters_roots;
+    for (int i = 0; i < obj.size (); i++)
+        { 
+        bool root_previously_recorded = false;
+
+        for (auto j : clusters_roots)
+            {
+            if (j == root [i])
+                {
+                root_previously_recorded = true;
+                break;
+                }
+            }
+
+        if (!root_previously_recorded && root [i] != -1) 
+            clusters_roots.push_back (root [i]);
+
+        }
+
+    //// Simple output
+    //for (int i = 0; i < obj.size (); i++)
+    //    {
+    //    if (root [i] != -1)
+    //        std::cout << i << " - joins to " << root [i] << std::endl;
+    //    else
+    //        std::cout << i << " - no cluster" << std::endl;
+    //    }
+
+    // Fills output container
+    std::vector < std::vector <T>> clusters;
+    for (auto i : clusters_roots)
+        { 
+        std::vector <T> newCluster;
+        
+        // Adds objects to the cluster's vector
+        for (int j = 0; j < obj.size (); j++)
+            if (i == root [j])
+                newCluster.push_back (obj [j]);
+        
+        clusters.push_back (newCluster);
+        }
+
+    // Clears the vectors
+    clusters_roots.resize (0);
+    root.resize (0);
+    for (int i = 0; i < obj.size (); i++)
+        neighb [i].resize (0);
+     neighb.resize (0);
+
+
+    return clusters;
     }
 
 void printOut (std::vector <Obj> objects)
