@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include "CSV.h"
+#include <list>
 
-#define M_SIZE 20
+#define M_SIZE 25
 
 struct Obj
     {
@@ -35,21 +36,17 @@ double distance (Obj obj0, Obj obj1)
 int main ()
     { 
     std::vector <Obj> objects;
-    for (int i = 0; i < M_SIZE; i++)
-        objects.push_back (Obj (i, rand () % M_SIZE, i));
+    
+    std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 100, 8, distance);
 
-    printOut (objects);
-
-    std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 3, 2, distance);
     for (int i = 0; i < clusters.size (); i++)
         { 
         std::cout << "Cluster: " << i << std::endl;
         for (int j = 0; j < clusters[i].size (); j++)
             std::cout << "\t" << clusters [i][j].id << std::endl;
         }
-    printf ("\n");
-
-
+    
+    
     system ("pause");
     return 0;
     }
@@ -71,7 +68,7 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
         // For each object
         for (int j = 0; j < obj.size (); j++)
             // That is not "object i" and close enough to it
-            if (i != j && metrics (obj [i], obj [j]) < d)
+            if (i != j && metrics (obj [i], obj [j]) <= d)
                 // Add it to the table
                 newVec.push_back (j);
 
@@ -154,17 +151,12 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
             }
         }
 
-    //// Don't join
-    //else
-    //    { }
-
-
     // Object to return
     std::vector <std::vector <T>> clusters (n_clusters);
 
     // Convert clusters_ids to the clusters object
     for (int i = 0; i < obj.size (); i++)
-        if (cluster_ids [i] != 0)
+        if (cluster_ids [i] != 0) 
         clusters [cluster_ids [i]-1].push_back (obj [i]);
 
     return clusters;
@@ -185,7 +177,7 @@ void printOut (std::vector <Obj> objects)
         {
         for (int j = 0; j < M_SIZE; j++)
             {
-            printf ("%d ", matrix [j] [i]);
+            printf ("%c ", (matrix [j] [i])? '0' : '.');
             }
         printf ("\n");
         }
