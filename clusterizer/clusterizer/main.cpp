@@ -2,6 +2,7 @@
 #include <vector>
 #include "CSV.h"
 
+#define M_SIZE 10
 
 struct Obj
     {
@@ -20,6 +21,8 @@ struct Obj
 
 template <typename T> std::vector<std::vector <T>> DBSCAN (std::vector <T> obj, double d, double n, double (*metrics) (T, T));
 
+void printOut (std::vector <Obj> objects);
+
 // Obj dist metric
 double distance (Obj obj0, Obj obj1)
     {
@@ -32,8 +35,18 @@ double distance (Obj obj0, Obj obj1)
 int main ()
     { 
     std::vector <Obj> objects;
+    for (int i = 0; i < M_SIZE; i++)
+        objects.push_back (Obj (i, rand () % M_SIZE, i));
 
-    
+    printOut (objects);
+
+    std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 3, 2, distance);
+    for (int i = 0; i < clusters.size (); i++)
+        { 
+        
+        }
+
+
     system ("pause");
     return 0;
     }
@@ -106,8 +119,32 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
 
     // Convert clusters_ids to the clusters object
 
-    std::vector <std::vector <T>> clusters;
+    // Object to return
+    std::vector <std::vector <T>> clusters (n_clusters+1);
 
 
+    for (int i = 0; i < obj.size (); i++)
+        clusters [cluster_ids [i]].push_back (obj [i]);
+    }
 
+void printOut (std::vector <Obj> objects)
+    {
+    int matrix [M_SIZE] [M_SIZE] = { };
+
+    for (auto i : objects)
+        matrix [(int) i.x] [(int) i.y]++;
+
+    printf ("\n\n");
+    for (int i = 0; i < 10; i++)
+        printf ("%d ", i);
+    printf ("\n\n");
+    for (int i = 0; i < 10; i++)
+        {
+        for (int j = 0; j < 10; j++)
+            {
+            printf ("%d ", matrix [j] [i]);
+            }
+        printf ("\n");
+        }
+    printf ("\n");
     }
