@@ -2,7 +2,7 @@
 #include <vector>
 #include "CSV.h"
 
-#define M_SIZE 10
+#define M_SIZE 20
 
 struct Obj
     {
@@ -43,8 +43,11 @@ int main ()
     std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 3, 2, distance);
     for (int i = 0; i < clusters.size (); i++)
         { 
-        
+        std::cout << "Cluster: " << i << std::endl;
+        for (int j = 0; j < clusters[i].size (); j++)
+            std::cout << "\t" << clusters [i][j].id << std::endl;
         }
+    printf ("\n");
 
 
     system ("pause");
@@ -63,14 +66,17 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
     // Collects ids of the neighbours for each object
     for (int i = 0; i < obj.size (); i++)
         {
-        neighb.push_back (std::vector <int>);
+        std::vector <int> newVec;
+        
 
         for (int j = 0; j < obj.size (); j++)
             if (i != j && metrics (obj [i], obj [j]) < d)
-                neighb [i].push_back (j);
+                newVec.push_back (j);
+
+        neighb.push_back (newVec);
         }
 
-    std::vector <int> cluster_ids (obj.size ()) = { };
+    std::vector <int> cluster_ids (obj.size ());
     
     int n_clusters = 0;
 
@@ -87,22 +93,27 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
                 {
                 // "object j" id
                 int this_neighb_id = neighb [i][j];
-
-                // if "object j" is already in cluster
-                if (cluster_ids [obj [this_neighb_id]] != 0)
-                    // Join "object i" to the same cluster
-                    cluster_ids [i] = cluster_ids [obj [this_neighb_id]];
-                // else 
-                else
-                    {
-                    // if "object j" has no cluster
-                    if (cluster_ids [i] == 0)
-                        // Create new cluster with both objects
-                        cluster_ids [i] = cluster_ids [obj [this_neighb_id]] = ++n_clusters;
-                    else 
-                        // Else (if "object i" was clusterized before) join "object j" to the same cluster
-                        cluster_ids [obj [this_neighb_id]] = cluster_ids [i];
+                
+                // In case "object j" has enough neighb. too
+                if (neighb [this_neighb_id].size () >= n)
+                    { 
+                    // if "object j" is already in cluster
+                    if (cluster_ids [this_neighb_id] != 0)
+                        // Join "object i" to the same cluster
+                        cluster_ids [i] = cluster_ids [this_neighb_id];
+                    // else 
+                    else
+                        {
+                        // if "object j" has no cluster
+                        if (cluster_ids [i] == 0)
+                            // Create new cluster with both objects
+                            cluster_ids [i] = cluster_ids [this_neighb_id] = ++n_clusters;
+                        else
+                            // Else (if "object i" was clusterized before) join "object j" to the same cluster
+                            cluster_ids [this_neighb_id] = cluster_ids [i];
+                        }
                     }
+                
 
 
                 }
@@ -117,14 +128,15 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
     //else
     //    { }
 
-    // Convert clusters_ids to the clusters object
 
     // Object to return
     std::vector <std::vector <T>> clusters (n_clusters+1);
 
-
+    // Convert clusters_ids to the clusters object
     for (int i = 0; i < obj.size (); i++)
         clusters [cluster_ids [i]].push_back (obj [i]);
+
+    return clusters;
     }
 
 void printOut (std::vector <Obj> objects)
@@ -135,12 +147,12 @@ void printOut (std::vector <Obj> objects)
         matrix [(int) i.x] [(int) i.y]++;
 
     printf ("\n\n");
-    for (int i = 0; i < 10; i++)
-        printf ("%d ", i);
+    for (int i = 0; i < M_SIZE; i++)
+        printf ("%d ", i%10);
     printf ("\n\n");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < M_SIZE; i++)
         {
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < M_SIZE; j++)
             {
             printf ("%d ", matrix [j] [i]);
             }
