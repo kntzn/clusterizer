@@ -80,12 +80,12 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
     
     int n_clusters = 0;
 
-    // This creates new clusters
+    // Cluster collector
     for (int i = 0; i < obj.size (); i++)
         {
         int nNeighb = neighb [i].size ();
         
-        // In case this object has enough neighb.
+        // In case "object i" has enough neighb.
         if (nNeighb >= n)
             { 
             // For each nieghbour
@@ -113,17 +113,44 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
                             cluster_ids [this_neighb_id] = cluster_ids [i];
                         }
                     }
-                
-
-
                 }
             }
         }
 
+    // Cluster joiner
+    for (int i = 0; i < obj.size (); i++)
+        {
+        int nNeighb = neighb [i].size ();
 
-    //// Joins to other clusters
-    //else if (nNeighb == n - 1)
-    //    { }
+        // if "object i" does not have enough neighbours
+        //     but it is still clusterizeable
+        if (nNeighb == n - 1) // This is adjustable
+            {
+            // Then start searching the closest neighbour
+            double min_distance = INFINITY;
+            double closest_neighb_id = -1;
+
+            // For each nieghbour
+            for (int j = 0; j < nNeighb; j++)
+                {
+                // "object j" id
+                int this_neighb_id = neighb [i] [j];
+
+                // Saves the closest neighbour
+                double current_distance = distance (obj [i], obj [this_neighb_id]);
+                if (min_distance > current_distance)
+                    {
+                    min_distance = current_distance;
+                    closest_neighb_id = this_neighb_id;
+                    }
+
+                }
+
+            // Joins "object i" to the closest "object j"'s cluster
+            cluster_ids [i] = cluster_ids [closest_neighb_id];
+            }
+        }
+
     //// Don't join
     //else
     //    { }
