@@ -68,16 +68,19 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
         {
         std::vector <int> newVec;
         
-
+        // For each object
         for (int j = 0; j < obj.size (); j++)
+            // That is not "object i" and close enough to it
             if (i != j && metrics (obj [i], obj [j]) < d)
+                // Add it to the table
                 newVec.push_back (j);
 
         neighb.push_back (newVec);
         }
 
+    // List that contains id of each object's cluster
     std::vector <int> cluster_ids (obj.size ());
-    
+    // Cluster id
     int n_clusters = 0;
 
     // Cluster collector
@@ -157,11 +160,12 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
 
 
     // Object to return
-    std::vector <std::vector <T>> clusters (n_clusters+1);
+    std::vector <std::vector <T>> clusters (n_clusters);
 
     // Convert clusters_ids to the clusters object
     for (int i = 0; i < obj.size (); i++)
-        clusters [cluster_ids [i]].push_back (obj [i]);
+        if (cluster_ids [i] != 0)
+        clusters [cluster_ids [i]-1].push_back (obj [i]);
 
     return clusters;
     }
