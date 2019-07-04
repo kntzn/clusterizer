@@ -20,7 +20,11 @@ struct Obj
         { }
     };
 
-template <typename T> std::vector<std::vector <T>> DBSCAN (std::vector <T> obj, double d, double n, double (*metrics) (T, T));
+template <typename T> std::vector<std::vector <T>> DBSCAN (std::vector <T> obj, 
+                                                           double d,
+                                                           double n,
+                                                           double (*metrics) (T, T),
+                                                           bool debug_output = false);
 
 void printOut (std::vector <Obj> objects);
 
@@ -37,7 +41,14 @@ int main ()
     { 
     std::vector <Obj> objects;
     
-    std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 100, 8, distance);
+    for (int i = 0; i < M_SIZE; i++)
+        objects.push_back (Obj (i, rand () % M_SIZE, i));
+
+
+    printOut (objects);
+
+
+    std::vector<std::vector <Obj>> clusters = DBSCAN (objects, 3, 2, distance);
 
     for (int i = 0; i < clusters.size (); i++)
         { 
@@ -46,7 +57,6 @@ int main ()
             std::cout << "\t" << clusters [i][j].id << std::endl;
         }
     
-    
     system ("pause");
     return 0;
     }
@@ -54,12 +64,18 @@ int main ()
 
 
 
-template<typename T>
-std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, double (*metrics)(T, T))
+template<typename T> std::vector<std::vector <T>> DBSCAN (std::vector<T> obj,
+                                                          double d,
+                                                          double n,
+                                                          double (*metrics)(T, T),
+                                                          bool debug_output)
     {
     // List of the neighbours for each object
     std::vector <std::vector <int>> neighb;
     
+    if (debug_output)
+        std::cout << "\nNeighbour id collector: " << std::endl;
+
     // Collects ids of the neighbours for each object
     for (int i = 0; i < obj.size (); i++)
         {
@@ -72,6 +88,9 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
                 // Add it to the table
                 newVec.push_back (j);
 
+        if (debug_output)
+            std::cout << "\tid:" << i << "-" << newVec.size () << " neighb."<< std::endl;
+        
         neighb.push_back (newVec);
         }
 
@@ -79,6 +98,9 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
     std::vector <int> cluster_ids (obj.size ());
     // Cluster id
     int n_clusters = 0;
+
+    if (debug_output)
+        std::cout << "\nCluster id collector: " << std::endl;
 
     // Cluster collector
     for (int i = 0; i < obj.size (); i++)
@@ -114,7 +136,12 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
                         }
                     }
                 }
+                            
+            if (debug_output)
+                std::cout << "\tid:" << i << "-" << cluster_ids [i] << std::endl;
             }
+        else if (debug_output)
+            std::cout << "\tid:" << i << "-Not enough neighbours" << std::endl;
         }
 
     // Cluster joiner
@@ -152,12 +179,12 @@ std::vector<std::vector <T>> DBSCAN (std::vector<T> obj, double d, double n, dou
         }
 
     // Object to return
-    std::vector <std::vector <T>> clusters (n_clusters);
+    std::vector <std::vector <T>> clusters (n_clusters+1);
 
     // Convert clusters_ids to the clusters object
     for (int i = 0; i < obj.size (); i++)
-        if (cluster_ids [i] != 0) 
-        clusters [cluster_ids [i]-1].push_back (obj [i]);
+        //if (cluster_ids [i] != 0) 
+        clusters [cluster_ids [i]].push_back (obj [i]);
 
     return clusters;
     }
